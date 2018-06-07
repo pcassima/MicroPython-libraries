@@ -1,16 +1,22 @@
 """
 docstring
+
+Boards the library has been tested on:
 """
+
 ################################## TODO #######################################
-# TODO: write MCP23008 class
-# TODO: write MCP23008_pins class
+# TODO: write MCP23017 class
+# TODO: write MCP23017_pins class
 # TODO: figure out which methods the classes require
 
 
 ########################### Import statements #################################
+from machine import I2C
 
 
 ######################### Variable declarations ###############################
+__version__ = 0.0
+__author__ = 'P. Cassiman'
 
 
 ######################### Function declarations ###############################
@@ -19,66 +25,36 @@ docstring
 ########################### Class declarations ################################
 
 
-class MCP23008:
+class MCP23017_pins:
     """
-    docstring
-    """
-
-    _IODIR = 0x00
-    _IPOL = 0x01
-    _GPINTEN = 0x02
-    _DEFVAL = 0x03
-    _INTCON = 0x04
-    _IOCON = 0x05
-    _GPPU = 0x06
-    _INTF = 0x07
-    _INTCAP = 0x08
-    _GPIO = 0x09
-    _OLAT = 0x0A
-
-    def __init__(self, address):
-        """
-        docstring
-        """
-
-    def write(self, data):
-        """
-        docstring
-        """
-
-    def read(self):
-        """
-        docstring
-        """
-
-    def write_pin(self, pin, data):
-        """
-        docstring
-        """
-
-    def read_pin(self, pin):
-        """
-        docstring
-        """
-
-    def pin_mode(self, pin, mode, pullup):
-        """
-        docstring
-        """
-
-    def pin_polarity(self, pin, polarity):
-        """
-        docstring
-        """
-
-
-class MCP23008_pins:
-    """
-    docstring
+    Class that represents individual pins on the MCP23017's output. Has the
+    same interaction as the built-in Pin function from the machine module.
     """
 
-    def __init__(self, IC):
+    def __init__(self, IC, number):
+        """
+        docstring
+        """
 
+    def value(self, state=None):
+        """
+        docstring
+        """
+
+    def toggle(self):
+        """
+        docstring
+        """
+
+    def off(self):
+        """
+        docstring
+        """
+
+    def on(self):
+        """
+        docstring
+        """
 
 
 ################################# Main program ################################

@@ -1,12 +1,17 @@
 """
-File that contains the modules required for using 595 shift registers with the
-Pycom modules.
+File that contains the classes required for using 595 shift registers with
+MicroPython enabled microcontrollers.
 There will be a class for the entire shift register and then a subclass for
 each pin in the register. This way the the entire shift register can be used
 as a true output expander. Each bit or output will then be able to used as a
 "stand alone" pin. The classes and methods will then take care of write out
 the correct data to the shift register.
+
+Boards the library has been tested on:
+WiPy3.0 - P. Cassiman
+LoPy4 - P. Cassiman
 """
+
 ################################## TODO #######################################
 
 
@@ -16,7 +21,7 @@ from machine import Pin
 
 ######################### Variable declarations ###############################
 __version__ = 1.0
-__author__ = 'Pieter-Jan Cassiman'
+__author__ = 'P. Cassiman'
 
 
 ######################### Function declarations ###############################
@@ -39,6 +44,7 @@ class ShiftRegister:
     write to the entire group and write to all shift registers or you can write
     to a single shift register in the group.
     """
+
     # attributes for the shift out order, normal is LSB first
     shift_order_reverse = 1
     shift_order_normal = 0
@@ -120,6 +126,7 @@ class ShiftRegister:
         register. However since the 595 register do not support reading back
         the stored value, the data attribute is returned instead.
         """
+
         return self.data
 
     def read_byte(self, byte=0):
@@ -127,6 +134,7 @@ class ShiftRegister:
         This function will return a single byte out of the data attribute.
         See docstring of read_register function, for more detail.
         """
+
         return (self.data >> (8 * byte)) & 0b11111111
 
     def read_bit(self, bit=0):
@@ -134,6 +142,7 @@ class ShiftRegister:
         This function will return a single bit out of the data attribute.
         See docstring of read_register function, for more detail.
         """
+
         return (self.data >> bit) & 0b1
 
     def write_register(self, data=None):
@@ -147,6 +156,7 @@ class ShiftRegister:
         a pulse is asserted on the latch clock, bringing the data on the
         output.
         """
+
         if data:
             # When data is given update the data attribute
             # The new data is kept within size of the register
@@ -179,6 +189,7 @@ class ShiftRegister:
         This function will first set a byte in the data attribute and then
         write it out to the output.
         """
+
         # The data is kept within one byte through the AND operation
         self._set_byte(data & 0b11111111, byte)
         self.write_register()
@@ -188,6 +199,7 @@ class ShiftRegister:
         This function will first set a bit in the data attribute and then
         write it out to the output.
         """
+
         # The data is kept within one bit through the AND operation
         self._set_bit(state & 0b1, bit)
         self.write_register()
@@ -199,6 +211,7 @@ class ShiftRegister:
         series. This also enables support for treating each shift register in
         the series as an individual 8-bit port.
         """
+
         for i in range(8):
             self._set_bit(((data >> i) % 2), (i + (8 * byte)))
 
@@ -209,6 +222,7 @@ class ShiftRegister:
         be used as single pins. Making the shift register a true output
         expander
         """
+
         # AND operations for un-setting bits
         self.data &= ~(1 << bit)
         # OR operations for setting bits
@@ -234,21 +248,52 @@ class ShiftRegisterPins:
     This could make code really slow; if possible it is best to update the
     data of the entire register at once.
     """
+
     def __init__(self, register, number):
         """
         Constructor for this class
         :param register: The shift register object on which the pin is located
         :param number: The bit number of the pin (zero indexed)
         """
+
         self.register = register
         self.number = number
 
     def value(self, state=None):
+        """
+        docstring
+        """
+
         if state == None:
-            # Need to implement framework for this operation
             return self.register.read_bit(self.number)
         else:
             self.register.write_bit(state, self.number)
+
+    def toggle(self):
+        """
+        docstring
+        """
+
+        state = self.value()
+        if state:
+            self.off()
+        else:
+            self.on()
+
+    def off(self):
+        """
+        docstring
+        """
+
+        self.register.write_bit(0, self.number)
+
+    def on(self):
+        """
+        docstring
+        """
+        
+        self.register.write_bit(1, self.number)
+
 
 
 ################################# Main program ################################
