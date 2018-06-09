@@ -2,6 +2,7 @@
 docstring
 
 Boards the library has been tested on:
+LoPy4 - P. Cassiman
 """
 
 ################################## TODO #######################################
@@ -9,7 +10,7 @@ Boards the library has been tested on:
 # TODO: write MCP23008_pins class
 # TODO: Add support for interupt control
 # TODO: Finish single pin methods
-
+# TODO: Allow write method to change pullup configuration when mode=input
 
 
 ########################### Import statements #################################
@@ -55,31 +56,35 @@ class MCP23008:
     PIN_INPUT_NOPULLUP = 1
     PIN_INPUT_PULLUP = 2
 
-    HIGH = 1
-    LOW = 0
-
     def __init__(self, address, baudrate=100000):
         """
-        docstring
+        Constructor for the MCP23008 object. This method will save the address
+        of the IC and start an I2C object with the given baudrate. For now the
+        I2C object can only be made on BUS0 and as a master.
         """
         self.address = address
         self.i2c = I2C(0, I2C.MASTER, baudrate=baudrate)
 
     def write(self, data):
         """
-        docstring
+        Writes the data to the output latches, if the pins are defined as
+        inputs, the write method will have no effect. The data will be stored
+        in the register, but not appear on the output
         """
         self.i2c.writeto_mem(self.address, MCP23008._OLAT, bytes([data]))
 
     def read(self):
         """
-        docstring
+        Reads the actual value on the in or ouputs. This method works when the
+        mode is output or when it is input. This allows for checking on the
+        output latches.
         """
         return self.i2c.readfrom_mem(self.address, MCP23008._GPIO, 1)
 
     def mode(self, mode):
         """
-        docstring
+        Sets the mode of the pins; this can either be output, input, or input
+        with pullup.
         """
         if mode == MCP23008.PIN_OUTPUT:
             register_mode = 0x00
@@ -87,17 +92,19 @@ class MCP23008:
             register_mode = 0xFF
         elif mode == MCP23008.PIN_INPUT_PULLUP:
             register_mode = 0xFF
+            # setting the pullup register
             self.i2c.writeto_mem(self.address, MCP23008._GPPU, bytes([0xFF]))
+
         self.i2c.writeto_mem(self.address, MCP23008._IODIR,
                              bytes([register_mode]))
 
 
     def write_pin(self, pin, state):
         """
-        docstring
+        Method writes to a single pin via bitwise operations
         """
         register_state = self.read()
-        pin_state = (register_state >> pin) & 0x1
+        # pin_state = (register_state >> pin) & 0x1
         register_state &= ~(1 << pin)
         register_state |= (state << pin)
         self.write(register_state)
@@ -105,14 +112,14 @@ class MCP23008:
 
     def read_pin(self, pin):
         """
-        docstring
+        Method reads from a single pin via bitwise operations
         """
         tmp = self.read()
         return (tmp >> pin) & 0x1
 
     def pin_mode(self, pin, mode):
         """
-        docstring
+        Method to set the mode of a single pin.
         """
         register_mode = self.i2c.readfrom_mem(self.address, MCP23008._IODIR, 1)
         register_mode &= ~(1 << pin)
@@ -141,9 +148,6 @@ class MCP23008_pins:
     PIN_OUTPUT = MCP23008.PIN_OUTPUT
     PIN_INPUT_NOPULLUP = MCP23008.PIN_INPUT_NOPULLUP
     PIN_INPUT_PULLUP = MCP23008.PIN_INPUT_PULLUP
-
-    HIGH = 1
-    LOW = 0
 
     def __init__(self, IC, number, mode):
         """
