@@ -63,32 +63,33 @@ class MCP23008:
         docstring
         """
         self.address = address
-        i2c = I2C(0, I2C.master, baudrate=baudrate)
+        self.i2c = I2C(0, I2C.MASTER, baudrate=baudrate)
 
     def write(self, data):
         """
         docstring
         """
-        i2c.writeto_mem(self.address, cls._OLAT, bytes(data))
+        self.i2c.writeto_mem(self.address, MCP23008._OLAT, bytes([data]))
 
     def read(self):
         """
         docstring
         """
-        return i2c.readfrom_mem(self.address, cls._GPIO, 1)
+        return self.i2c.readfrom_mem(self.address, MCP23008._GPIO, 1)
 
     def mode(self, mode):
         """
         docstring
         """
-        if mode == cls.PIN_OUTPUT:
+        if mode == MCP23008.PIN_OUTPUT:
             register_mode = 0x00
-        elif mode == cls.PIN_INPUT_NOPULLUP:
+        elif mode == MCP23008.PIN_INPUT_NOPULLUP:
             register_mode = 0xFF
-        if mode == cls.PIN_INPUT_PULLUP:
+        elif mode == MCP23008.PIN_INPUT_PULLUP:
             register_mode = 0xFF
-            i2c.writeto_mem(self.address, cls._GPPU, bytes(0xFF))
-        i2c.writeto_mem(self.address, cls._IODIR, bytes(register_mode))
+            self.i2c.writeto_mem(self.address, MCP23008._GPPU, bytes([0xFF]))
+        self.i2c.writeto_mem(self.address, MCP23008._IODIR,
+                             bytes([register_mode]))
 
 
     def write_pin(self, pin, state):
@@ -113,21 +114,22 @@ class MCP23008:
         """
         docstring
         """
-        register_mode = i2c.readfrom_mem(self.address, cls._IODIR, 1)
+        register_mode = self.i2c.readfrom_mem(self.address, MCP23008._IODIR, 1)
         register_mode &= ~(1 << pin)
-        if mode == cls.PIN_OUTPUT:
+        if mode == MCP23008.PIN_OUTPUT:
             pass
-        elif mode == cls.PIN_INPUT_NOPULLUP:
+        elif mode == MCP23008.PIN_INPUT_NOPULLUP:
             register_mode |= 1 << pin
-            pullup = i2c.readfrom_mem(self.address, cls._GPPU, 1)
+            pullup = self.i2c.readfrom_mem(self.address, MCP23008._GPPU, 1)
             pullup &= ~(1 << pin)
-            i2c.writeto_mem(self.address, cls._GPPU, bytes(pullup))
-        elif mode == cls.PIN_INPUT_PULLUP:
+            self.i2c.writeto_mem(self.address, MCP23008._GPPU, bytes([pullup]))
+        elif mode == MCP23008.PIN_INPUT_PULLUP:
             register_mode |= 1 << pin
-            pullup = i2c.readfrom_mem(self.address, cls._GPPU, 1)
+            pullup = self.i2c.readfrom_mem(self.address, MCP23008._GPPU, 1)
             pullup |= (1 << pin)
-            i2c.writeto_mem(self.address, cls._GPPU, bytes(pullup))
-        i2c.writeto_mem(self.address, cls._IODIR, bytes(register_mode))
+            self.i2c.writeto_mem(self.address, MCP23008._GPPU, bytes([pullup]))
+        self.i2c.writeto_mem(self.address, MCP23008._IODIR,
+                             bytes([register_mode]))
 
 
 class MCP23008_pins:
