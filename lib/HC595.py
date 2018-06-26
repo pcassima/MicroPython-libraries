@@ -291,9 +291,12 @@ class ShiftRegisterPins:
         """
         docstring
         """
-        
+
         self.register.write_bit(1, self.number)
 
 
 
 ################################# Main program ################################
+
+if __name__ == '__main__':
+    # run some test program

@@ -79,7 +79,7 @@ class MCP23008:
         mode is output or when it is input. This allows for checking on the
         output latches.
         """
-        return self.i2c.readfrom_mem(self.address, MCP23008._GPIO, 1)
+        return self.i2c.readfrom_mem(self.address, MCP23008._GPIO, 1)[0]
 
     def mode(self, mode):
         """
@@ -121,22 +121,22 @@ class MCP23008:
         """
         Method to set the mode of a single pin.
         """
-        register_mode = self.i2c.readfrom_mem(self.address, MCP23008._IODIR, 1)
-        register_mode &= ~(1 << pin)
+        reg_mode = self.i2c.readfrom_mem(self.address, MCP23008._IODIR, 1)[0]
+        reg_mode &= ~(1 << pin)
         if mode == MCP23008.PIN_OUTPUT:
             pass
         elif mode == MCP23008.PIN_INPUT_NOPULLUP:
-            register_mode |= 1 << pin
-            pullup = self.i2c.readfrom_mem(self.address, MCP23008._GPPU, 1)
+            reg_mode |= 1 << pin
+            pullup = self.i2c.readfrom_mem(self.address, MCP23008._GPPU, 1)[0]
             pullup &= ~(1 << pin)
             self.i2c.writeto_mem(self.address, MCP23008._GPPU, bytes([pullup]))
         elif mode == MCP23008.PIN_INPUT_PULLUP:
-            register_mode |= 1 << pin
-            pullup = self.i2c.readfrom_mem(self.address, MCP23008._GPPU, 1)
+            reg_mode |= 1 << pin
+            pullup = self.i2c.readfrom_mem(self.address, MCP23008._GPPU, 1)[0]
             pullup |= (1 << pin)
             self.i2c.writeto_mem(self.address, MCP23008._GPPU, bytes([pullup]))
         self.i2c.writeto_mem(self.address, MCP23008._IODIR,
-                             bytes([register_mode]))
+                             bytes([reg_mode]))
 
 
 class MCP23008_pins:
@@ -203,3 +203,6 @@ class MCP23008_pins:
 
 
 ################################# Main program ################################
+
+if __name__ == '__main__':
+    # run some test program
